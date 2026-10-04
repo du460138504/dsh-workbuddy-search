@@ -1,0 +1,50 @@
+{
+  "name": "dsh-workbuddy-search",
+  "version": "0.1.0",
+  "displayName": "DSH WorkBuddy Search",
+  "author": "du460138504",
+  "description": "用 WorkBuddy 账号与积分提供 web 搜索 — a workbuddy_search tool billed to the WorkBuddy account, independent of the DeepSeek account.",
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "deepseek",
+    "workbuddy",
+    "search",
+    "web-search"
+  ],
+  "type": "module",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "README.en.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/du460138504/dsh-workbuddy-search.git"
+  },
+  "homepage": "https://github.com/du460138504/dsh-workbuddy-search#readme",
+  "bugs": {
+    "url": "https://github.com/du460138504/dsh-workbuddy-search/issues"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "0.2.0-rc.2",
+    "@deepseek-ai/schemastery": "^3.18.2"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

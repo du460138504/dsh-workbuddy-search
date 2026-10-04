@@ -1,0 +1,14 @@
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Never commit credentials or captured auth documents
+.workbuddy-auth.json
+*.info
+.env
+.env.*

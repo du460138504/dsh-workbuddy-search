@@ -1,0 +1,6 @@
+# Register the WorkBuddy-backed search tool. Tool registration is additive:
+# DSH's built-in `web_search` keeps working, and this adds `workbuddy_search`
+# alongside it.
+- insert:
+    - id: tool-workbuddy-search
+      name: dsh-workbuddy-search
