@@ -71,6 +71,16 @@ set WORKBUDDY_ELECTRON_BIN=%LOCALAPPDATA%\Programs\WorkBuddy\WorkBuddy.exe
 export WORKBUDDY_ELECTRON_BIN="/Applications/WorkBuddy.app/Contents/MacOS/Electron"
 ```
 
+Default locations probed automatically:
+
+| Platform | Electron executable |
+|---|---|
+| Windows | `%LOCALAPPDATA%\Programs\WorkBuddy\WorkBuddy.exe` |
+| macOS | `/Applications/WorkBuddy.app/Contents/MacOS/Electron`, then the same path under `~/Applications` |
+| Linux | none — the desktop app has no verified layout there, so `WORKBUDDY_ELECTRON_BIN` is required |
+
+On macOS this is the **Electron executable inside the bundle**, not the app launcher: `ELECTRON_RUN_AS_NODE` needs the former.
+
 DSH must be **fully restarted** afterwards (the variable is read when the credential is, not at startup).
 
 ## Troubleshooting
