@@ -90,6 +90,28 @@ Windows 下先探 `Local` 再探 `Roaming`；Linux 下先探 config home 再探 
 
 可以用环境变量 `WORKBUDDY_AUTH_FILE` 指定其它位置。插件**只读**该文件，不写入、不改动 App 的登录状态。
 
+### 凭据加密（WorkBuddy 5.6.2 起）
+
+WorkBuddy 从 **5.6.2** 起把 `accessToken`/`refreshToken` 加密封存。插件自动识别两种形态并分别处理：
+
+| WorkBuddy 版本 | 凭据形态 | 插件行为 |
+|---|---|---|
+| ≤ 5.3.x | 明文 JSON | 直接读取 |
+| ≥ 5.6.2 | `{$wbEncrypted:1, envelope:"…"}` 封套 | 自动解密 |
+
+解密需要 App 的 at-rest 密钥，插件通过以 `ELECTRON_RUN_AS_NODE=1` 启动 WorkBuddy 可执行文件、执行一段内联脚本取得该密钥，再用 **AES-256-GCM** 打开封套（AAD 为 App 自身的 `WB-AAD\0` 认证上下文）。这一步与 [dsh-workbuddy-connect](https://github.com/corrinehu/dsh-workbuddy-connect) 的做法一致。
+
+如果自动定位 App 失败，用环境变量指定可执行文件：
+
+```sh
+# Windows
+set WORKBUDDY_ELECTRON_BIN=%LOCALAPPDATA%\Programs\WorkBuddy\WorkBuddy.exe
+# macOS 举例
+export WORKBUDDY_ELECTRON_BIN="/Applications/WorkBuddy.app/Contents/MacOS/Electron"
+```
+
+设置后需**完全退出并重启 DSH**（插件在读取时才会用到该变量）。
+
 ## 排错
 
 | 现象 | 原因 | 处理 |
@@ -97,11 +119,15 @@ Windows 下先探 `Local` 再探 `Roaming`；Linux 下先探 config home 再探 
 | 装不上，提示 incompatible | 内核版本不是 `0.2.0-rc.2` | 升级/降级 DSH，或用 `dsh plugin allow-version` 显式豁免 |
 | 工具列表里没有 `workbuddy_search` | 插件没加载成功 | 看 DSH 的插件面板是否有「异常」标记；重启 DSH |
 | 调用报「No WorkBuddy credential found」 | 没装或没登录 WorkBuddy App | 打开 App 登录；或用 `WORKBUDDY_AUTH_FILE` 指定凭据路径 |
+| 调用报「could not be found to read its at-rest key」 | 凭据已加密，但找不到 App | 设置 `WORKBUDDY_ELECTRON_BIN` 指向 WorkBuddy 可执行文件 |
+| 调用报「does not match the credential's envelope」 | 封套由另一个 WorkBuddy 安装封的 | 打开 WorkBuddy App 一次，让它重新封存登录态 |
+| 调用报「could not be decrypted」 | at-rest 密钥已变 | 同上，打开 App 重新封存 |
+| 调用报「exists but is unreadable」 | 凭据文件既非明文也非可解封套 | 按提示修复或删除该文件——它是身份权威，会盖过其它候选 |
 | 调用报「access token has expired」 | 登录态过期 | 在 WorkBuddy App 里重新登录 |
 | 调用报 401/403 | 凭据被服务端拒绝 | 同上，重新登录 |
 | 插件卡片显示「异常」 | `apply()` 抛错 | 多为内核 API 不匹配，检查版本要求 |
 
-若插件面板出现异常，可直接跑 `node check.mjs` 区分是「凭据/网络问题」还是「插件加载问题」。
+若插件面板出现异常，可直接跑 `node check.mjs` 区分是「凭据/网络问题」还是「插件加载问题」。它会打印凭据**形态**（明文或加密），这在排查加密相关问题时最有用。
 
 ## 用法
 
