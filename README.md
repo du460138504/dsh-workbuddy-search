@@ -20,14 +20,41 @@ DeepSeek search has no API key for "DEEPSEEK_API_KEY"
 
 ## 安装
 
+**前置条件（缺一不可）**：
+
+1. **DSH `0.2.0-rc.2` 内核**。本插件锁定了该版本的内核 API——见下方「版本要求」。
+2. **WorkBuddy 桌面 App 已安装并登录**。插件复用它的登录态，不启动独立的 OAuth。
+
 ```sh
+# Desktop 版
 dsh plugin --profile desktop add github:du460138504/dsh-workbuddy-search
 dsh --profile desktop
+
+# Web 版
+dsh plugin --profile web add github:du460138504/dsh-workbuddy-search
+dsh web
 ```
 
-插件自带 `cordis.patch.yml`，`dsh.bundle.patch` 会指向它，注册是自动的——不需要手写 profile 的 patch 条目。
+插件自带 `cordis.patch.yml`，`dsh.bundle.patch` 指向它，注册是自动的——**不需要手写 profile 的 patch 条目**。
 
-安装后重启 DSH，工具列表里就会出现 `workbuddy_search`。
+安装后**重启 DSH**，工具列表里出现 `workbuddy_search` 即成功。
+
+### 版本要求
+
+`package.json` 声明了 `"@deepseek-ai/dsh-tools": "0.2.0-rc.2"`。DSH 在安装时会做兼容性校验：**内核版本不匹配会被直接拒绝**，并给出类似提示：
+
+```
+Plugin dsh-workbuddy-search@0.1.0 is incompatible with dsh <version>:
+peerDependencies {"@deepseek-ai/dsh-tools":"0.2.0-rc.2"}.
+```
+
+这是**刻意**的：DSH 内核 API 在 rc 阶段仍可能变动，放宽范围会导致装上后崩溃。若你确认风险并要强制安装：
+
+```sh
+dsh plugin allow-version dsh-workbuddy-search@0.1.0
+```
+
+内核 `0.3.x` 及以上需要本插件相应更新，不要用豁免硬装。
 
 ### 从源码安装
 
@@ -35,6 +62,18 @@ dsh --profile desktop
 git clone https://github.com/du460138504/dsh-workbuddy-search
 dsh plugin --profile desktop add link:/path/to/dsh-workbuddy-search
 ```
+
+`link:` 方式下改动源码即时可见（仍需重启 DSH 重新加载）。
+
+### 验证是否装好
+
+不经过 DSH 的独立自检：
+
+```sh
+node check.mjs
+```
+
+它会打印凭据路径、账号、token 是否过期、API 基址，并发起一次真实搜索。**如果这一步就失败，插件在 DSH 里也不会工作**——这是排错的第一站。
 
 ## 前置条件
 
@@ -50,6 +89,19 @@ dsh plugin --profile desktop add link:/path/to/dsh-workbuddy-search
 Windows 下先探 `Local` 再探 `Roaming`；Linux 下先探 config home 再探 data home（UOS/deepin 写在后者）。
 
 可以用环境变量 `WORKBUDDY_AUTH_FILE` 指定其它位置。插件**只读**该文件，不写入、不改动 App 的登录状态。
+
+## 排错
+
+| 现象 | 原因 | 处理 |
+|---|---|---|
+| 装不上，提示 incompatible | 内核版本不是 `0.2.0-rc.2` | 升级/降级 DSH，或用 `dsh plugin allow-version` 显式豁免 |
+| 工具列表里没有 `workbuddy_search` | 插件没加载成功 | 看 DSH 的插件面板是否有「异常」标记；重启 DSH |
+| 调用报「No WorkBuddy credential found」 | 没装或没登录 WorkBuddy App | 打开 App 登录；或用 `WORKBUDDY_AUTH_FILE` 指定凭据路径 |
+| 调用报「access token has expired」 | 登录态过期 | 在 WorkBuddy App 里重新登录 |
+| 调用报 401/403 | 凭据被服务端拒绝 | 同上，重新登录 |
+| 插件卡片显示「异常」 | `apply()` 抛错 | 多为内核 API 不匹配，检查版本要求 |
+
+若插件面板出现异常，可直接跑 `node check.mjs` 区分是「凭据/网络问题」还是「插件加载问题」。
 
 ## 用法
 
