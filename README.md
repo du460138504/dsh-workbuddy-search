@@ -44,14 +44,14 @@ dsh web
 `package.json` 声明了 `"@deepseek-ai/dsh-tools": "0.2.0-rc.2"`。DSH 在安装时会做兼容性校验：**内核版本不匹配会被直接拒绝**，并给出类似提示：
 
 ```
-Plugin dsh-workbuddy-search@0.1.0 is incompatible with dsh <version>:
+Plugin dsh-workbuddy-search@0.2.0 is incompatible with dsh <version>:
 peerDependencies {"@deepseek-ai/dsh-tools":"0.2.0-rc.2"}.
 ```
 
 这是**刻意**的：DSH 内核 API 在 rc 阶段仍可能变动，放宽范围会导致装上后崩溃。若你确认风险并要强制安装：
 
 ```sh
-dsh plugin allow-version dsh-workbuddy-search@0.1.0
+dsh plugin allow-version dsh-workbuddy-search@0.2.0
 ```
 
 内核 `0.3.x` 及以上需要本插件相应更新，不要用豁免硬装。
