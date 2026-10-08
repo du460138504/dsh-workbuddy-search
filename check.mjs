@@ -4,8 +4,34 @@
 //
 // Reads the WorkBuddy desktop credential and performs one real search, so a
 // broken token or a blocked network shows up in seconds instead of at the
-// first model-driven tool call.
-import { loadCredential, resolveApiBase, isExpired, WORKBUDDY_SEARCH_PATH } from "./lib/auth.js";
+// first model-driven tool call. It also reports the credential's on-disk
+// format, which is the first thing to know when the app has sealed it.
+import { readFile } from "node:fs/promises";
+import {
+	authCandidates,
+	classifyDesktopAuthDocument,
+	isExpired,
+	loadCredential,
+	resolveApiBase,
+	WORKBUDDY_SEARCH_PATH,
+} from "./lib/auth.js";
+
+// Report the format of every candidate before attempting the load: a sealed
+// document that cannot be opened is diagnosed far better with this than with
+// the load error alone.
+console.log("-- credential candidates --");
+for (const path of authCandidates()) {
+	let text;
+	try {
+		text = await readFile(path, "utf8");
+	} catch (error) {
+		console.log(`  ${path}\n    -> unreadable: ${error instanceof Error ? error.message : String(error)}`);
+		continue;
+	}
+	const { format } = classifyDesktopAuthDocument(text);
+	console.log(`  ${path}\n    -> ${format}`);
+}
+console.log();
 
 const { credential } = await loadCredential();
 console.log("credential path :", credential.path);
