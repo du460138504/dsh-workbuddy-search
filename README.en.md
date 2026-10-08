@@ -51,6 +51,45 @@ On Windows, `Local` is probed before `Roaming`; on Linux, the config home before
 
 Set `WORKBUDDY_AUTH_FILE` to point somewhere else. The plugin **only reads** this file — it never writes to it or touches the app's sign-in state.
 
+### Encrypted credentials (WorkBuddy 5.6.2 and later)
+
+From **5.6.2**, WorkBuddy seals `accessToken`/`refreshToken`. The plugin detects both shapes and handles each:
+
+| WorkBuddy version | Credential shape | Plugin behaviour |
+|---|---|---|
+| ≤ 5.3.x | plaintext JSON | read directly |
+| ≥ 5.6.2 | `{$wbEncrypted:1, envelope:"…"}` wrapper | decrypted automatically |
+
+Decryption needs the app's at-rest secret, which only the Electron binary hands out. The plugin spawns the WorkBuddy executable as Node (`ELECTRON_RUN_AS_NODE=1`) running an inline script, then opens the envelope with **AES-256-GCM**, using the app's own `WB-AAD\0` authenticated context as AAD. This matches how [dsh-workbuddy-connect](https://github.com/corrinehu/dsh-workbuddy-connect) does it.
+
+If the app cannot be located automatically, point at its executable:
+
+```sh
+# Windows
+set WORKBUDDY_ELECTRON_BIN=%LOCALAPPDATA%\Programs\WorkBuddy\WorkBuddy.exe
+# macOS
+export WORKBUDDY_ELECTRON_BIN="/Applications/WorkBuddy.app/Contents/MacOS/Electron"
+```
+
+DSH must be **fully restarted** afterwards (the variable is read when the credential is, not at startup).
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Install refused as incompatible | Kernel is not `0.2.0-rc.2` | Upgrade/downgrade DSH, or grant an explicit exemption with `dsh plugin allow-version` |
+| `workbuddy_search` missing from the tool list | Plugin did not load | Check the plugin panel for an "异常" badge; restart DSH |
+| "No WorkBuddy credential found" | WorkBuddy app missing or signed out | Sign in; or set `WORKBUDDY_AUTH_FILE` |
+| "could not be found to read its at-rest key" | Credential is sealed but the app is missing | Set `WORKBUDDY_ELECTRON_BIN` to the WorkBuddy executable |
+| "does not match the credential's envelope" | Envelope was sealed by a different install | Open the WorkBuddy app once so it reseals the sign-in |
+| "could not be decrypted" | The at-rest key changed | Same — open the app to reseal |
+| "exists but is unreadable" | Neither plaintext nor a decodable envelope | Repair or remove the file; it is the identity authority and outranks other candidates |
+| "access token has expired" | Sign-in expired | Sign in again in the WorkBuddy app |
+| 401/403 | Credential rejected by the server | Same — sign in again |
+| Plugin card shows "异常" | `apply()` threw | Usually a kernel API mismatch; check the version requirement |
+
+When the plugin panel reports a problem, run `node check.mjs` to separate a credential/network failure from a plugin-load failure. It prints the credential's **format** (plaintext or encrypted), which matters most when diagnosing seal-related failures.
+
 ## Usage
 
 The model calls it on its own; you can also ask for it explicitly. Parameters:
