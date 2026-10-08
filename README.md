@@ -106,9 +106,19 @@ WorkBuddy 从 **5.6.2** 起把 `accessToken`/`refreshToken` 加密封存。插�
 ```sh
 # Windows
 set WORKBUDDY_ELECTRON_BIN=%LOCALAPPDATA%\Programs\WorkBuddy\WorkBuddy.exe
-# macOS 举例
+# macOS
 export WORKBUDDY_ELECTRON_BIN="/Applications/WorkBuddy.app/Contents/MacOS/Electron"
 ```
+
+自动探测的默认位置：
+
+| 平台 | Electron 可执行文件 |
+|---|---|
+| Windows | `%LOCALAPPDATA%\Programs\WorkBuddy\WorkBuddy.exe` |
+| macOS | `/Applications/WorkBuddy.app/Contents/MacOS/Electron`，其次是 `~/Applications/…`（同一相对路径） |
+| Linux | 无默认值——桌面版在该平台没有已验证的安装布局，必须用 `WORKBUDDY_ELECTRON_BIN` 指定 |
+
+macOS 上指向的是 **bundle 内的 Electron 可执行文件**，不是 App 启动器——`ELECTRON_RUN_AS_NODE` 需要前者。
 
 设置后需**完全退出并重启 DSH**（插件在读取时才会用到该变量）。
 
