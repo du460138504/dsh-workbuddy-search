@@ -2,6 +2,15 @@
 
 本项目所有值得注意的变更都记录在此。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.2.1] - 2026-10-17
+
+适配 DeepSeek Harness 0.2.1。
+
+### 变更
+
+- `@deepseek-ai/dsh-tools` 的 peer 范围由 `0.2.0-rc.2` 放宽为 `^0.2.0-rc.2`。此前锁死单个版本号，DSH 升到 `0.2.1-rc.2` 后宿主判定不兼容并**整体跳过本插件**——表现是 `workbuddy_search` 工具凭空消失，只能在 profile 里手工 `allow-version` 豁免才能恢复。新范围覆盖 `0.2.0-rc.2` / `0.2.1-alpha.1` / `0.2.1-rc.2` / `0.2.2`，同时不放进 `0.3`：跨次版本仍需要一次真实的兼容性评估。
+- 顺带确认宿主接口未变：`@deepseek-ai/dsh-tools` 的 `defineTool`，以及插件注入的 `tools` / `systemPrompt` 两个服务在 0.2.1-rc.2 中均仍然存在。
+
 ## [0.2.0] - 2026-10-08
 
 支撑 WorkBuddy 5.6.2 起的加密凭据，并补齐跨平台定位。
@@ -36,5 +45,6 @@
 - token 过期时快速失败并给出可操作提示，不做自动刷新。
 - 插件自带 `cordis.patch.yml`，注册自动化，无需手写 profile patch 条目。
 
+[0.2.1]: https://github.com/du460138504/dsh-workbuddy-search/releases/tag/v0.2.1
 [0.2.0]: https://github.com/du460138504/dsh-workbuddy-search/releases/tag/v0.2.0
 [0.1.0]: https://github.com/du460138504/dsh-workbuddy-search/releases/tag/v0.1.0
