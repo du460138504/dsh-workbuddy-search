@@ -2,6 +2,22 @@
 
 本项目所有值得注意的变更都记录在此。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.2.2] - 2026-10-19
+
+自带更新提醒。
+
+### 新增
+
+- **浏览器半边**。本插件此前只有 host 侧（工具注册），没有 `lib/client.js`，因此无法在界面上提示任何东西。现在新增 `./client` 导出与 `dsh.client` 声明（依赖 `dsh-client-locale`、`dsh-client-ui-renderer`），并把两者加入 `peerDependencies`。
+- **自更新提醒**。启动时向本插件自己的 host 路由 `/plugins/dsh-workbuddy-search/update-check` 询问 npm 上是否有更新版本；有则通过 `shell.overlay` 插槽弹出提示。
+- **「更新」按钮**：host 侧执行 `dsh plugin --profile <当前 profile> add dsh-workbuddy-search@<版本>`，成功后提示完全退出并重启 DSH。
+- **「以后更新」按钮**：只关闭本次会话的提示，不写入任何存储——**下次启动会再次提醒**。
+
+### 安全
+
+- 两条路由都要求 loopback 的 Host（及浏览器附带的 Origin），拒绝 DNS rebinding 页面。
+- 只允许安装 npm 上**确实是 latest** 的版本号；请求体同样做语义化版本校验。
+
 ## [0.2.1] - 2026-10-17
 
 适配 DeepSeek Harness 0.2.1。
@@ -45,6 +61,7 @@
 - token 过期时快速失败并给出可操作提示，不做自动刷新。
 - 插件自带 `cordis.patch.yml`，注册自动化，无需手写 profile patch 条目。
 
+[0.2.2]: https://github.com/du460138504/dsh-workbuddy-search/releases/tag/v0.2.2
 [0.2.1]: https://github.com/du460138504/dsh-workbuddy-search/releases/tag/v0.2.1
 [0.2.0]: https://github.com/du460138504/dsh-workbuddy-search/releases/tag/v0.2.0
 [0.1.0]: https://github.com/du460138504/dsh-workbuddy-search/releases/tag/v0.1.0
