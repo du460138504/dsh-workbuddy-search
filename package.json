@@ -1,6 +1,6 @@
 {
   "name": "dsh-workbuddy-search",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "displayName": "DSH WorkBuddy Search",
   "author": "du460138504",
   "description": "用 WorkBuddy 账号与积分提供 web 搜索 — a workbuddy_search tool billed to the WorkBuddy account, independent of the DeepSeek account.",
